@@ -17,8 +17,7 @@ CREATE TABLE cidade (
     codCidade INT AUTO_INCREMENT PRIMARY KEY,
     nomeCidade VARCHAR(50) NOT NULL UNIQUE,
     siglaEstado VARCHAR(2) NOT NULL,
-    FOREIGN KEY siglaEstado REFERENCES estado(siglaEstado) ON DELETE CASCADE ON UPDATE CASCADE
-    FOREIGN KEY codCidade REFERENCES fornecedor(codCidade) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (siglaEstado) REFERENCES estado(siglaEstado) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE vendedor (
@@ -30,8 +29,9 @@ CREATE TABLE vendedor (
     telefone VARCHAR(20) NOT NULL,
     codCidade INT NOT NULL,
     dataContratacao DATE DEFAULT CURRENT_DATE NOT NULL,
-    codDepartamento INT NOT NULL,    
-    FOREIGN KEY (codVendedor) REFERENCES venda(codVendedor) ON DELETE CASCADE ON UPDATE CASCADE,
+    codDepartamento INT NOT NULL,
+    FOREIGN KEY (codCidade) REFERENCES cidade(codCidade) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (codDepartamento) REFERENCES departamento(codDepartamento) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE cliente (
@@ -39,28 +39,12 @@ CREATE TABLE cliente (
     endereco VARCHAR(60) NOT NULL,
     codCidade INT NOT NULL,
     telefone VARCHAR(20) NOT NULL,
-    tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J'))
+    tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
     dataCadastro DATE DEFAULT CURRENT_DATE NOT NULL,
     cep CHAR(8) NOT NULL,
+    FOREIGN KEY (codCidade) REFERENCES cidade(codCidade) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (codCliente) REFERENCES clienteFisico(codCliente) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (codCliente) REFERENCES clienteJuridico(codCliente) ON DELETE CASCADE ON UPDATE CASCADE
-    FOREIGN KEY (codCliente) REFERENCES venda(codCliente) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE clienteFisico (
-    codCliente INT PRIMARY KEY,
-    nome VARCHAR(50) NOT NULL UNIQUE,
-    dataNascimento DATE NOT NULL,
-    cpf CHAR(11) NOT NULL UNIQUE,
-    rg CHAR(8) NOT NULL UNIQUE
-);
-
-CREATE TABLE clienteJuridico (
-    codCliente INT PRIMARY KEY,
-    nomeFantasia VARCHAR(80) NOT NULL UNIQUE,
-    razaoSocial VARCHAR(80) NOT NULL UNIQUE,
-    ie VARCHAR(20) NOT NULL UNIQUE,
-    cgc VARCHAR(20) NOT NULL UNIQUE
 );
 
 CREATE TABLE classe (
@@ -68,19 +52,17 @@ CREATE TABLE classe (
     sigla VARCHAR(12) NOT NULL UNIQUE,
     nome VARCHAR(40) NOT NULL UNIQUE,
     descricao VARCHAR(80) DEFAULT NULL
-    FOREIGN KEY (codClasse) REFERENCES produto(codClasse) ON DELETE CASCADE ON UPDATE CASCADE
-
 );
 
 CREATE TABLE produto (
     codProduto INT AUTO_INCREMENT PRIMARY KEY,
-    desricao VARCHAR(40) NOT NULL UNIQUE,
+    descricao VARCHAR(40) NOT NULL UNIQUE,
     unidadeMedida CHAR(2) NOT NULL CHECK (unidadeMedida IN ('UN', 'KG', 'LT', 'PC')),
     embalagem VARCHAR(15) NOT NULL DEFAULT 'fardo',
     codClasse INT NOT NULL,
     precoVenda DECIMAL(14,2) NOT NULL UNIQUE,
-    estoqueMnimo DECIMAL(14,2) NOT NULL UNIQUE,
-    FOREIGN KEY (codProduto) REFERENCES produtoLote(codProduto) ON DELETE CASCADE ON UPDATE CASCADE,
+    estoqueMinimo DECIMAL(14,2) NOT NULL UNIQUE,
+    FOREIGN KEY (codClasse) REFERENCES classe(codClasse) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE produtoLote (
@@ -90,9 +72,8 @@ CREATE TABLE produtoLote (
     quantidadeVendida DECIMAL(14,2) NOT NULL,
     precoCusto DECIMAL(14,2) NOT NULL,
     dataValidade DATE NOT NULL,
-    FOREIGN KEY codProduto REFERENCES itemVenda(codProduto) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY numeroLote REFERENCES itemVenda(numeroLote) ON DELETE CASCADE ON UPDATE CASCADE,
-)
+    FOREIGN KEY (codProduto) REFERENCES produto(codProduto) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 CREATE TABLE venda (
     codVenda INT AUTO_INCREMENT PRIMARY KEY,
